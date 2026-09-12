@@ -4,7 +4,7 @@
 # ─────────────────────────────────────────────────────────────────────────────
 
 # ── Stage 1: Build ────────────────────────────────────────────────────────────
-FROM maven:3.9.6-eclipse-temurin-17 AS build
+FROM maven:3.9.6-eclipse-temurin-21 AS build
 
 WORKDIR /app
 
@@ -17,7 +17,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests -B
 
 # ── Stage 2: Runtime ──────────────────────────────────────────────────────────
-FROM eclipse-temurin:17-jdk-jammy AS runtime
+FROM eclipse-temurin:21-jdk-jammy AS runtime
 
 # Create non-root user for security
 RUN groupadd -r spring && useradd -r -g spring spring

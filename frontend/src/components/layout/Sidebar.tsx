@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard, Ticket, Settings, Users, UserCircle,
-  Bell, BarChart2, Briefcase, X, ShieldCheck,
+  Bell, BarChart2, Briefcase, X, ShieldCheck, type LucideIcon,
 } from 'lucide-react'
 import clsx from 'clsx'
 
@@ -13,7 +13,7 @@ interface SidebarProps {
 interface NavItem {
   label: string
   to: string
-  icon: React.ComponentType<{ size?: number; className?: string }>
+  icon: LucideIcon
 }
 
 // Navigation items — will be filtered by role in Phase 2
