@@ -1,0 +1,48 @@
+# ─── Node / Frontend ──────────────────────────────────────────────────────────
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+frontend/dist/
+
+# ─── Java / Maven / Backend ───────────────────────────────────────────────────
+backend/target/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+backend/.mvn/wrapper/maven-wrapper.jar
+
+# ─── Spring Boot / IntelliJ ──────────────────────────────────────────────────
+*.iml
+.idea/
+*.iws
+*.ipr
+
+# ─── VS Code ──────────────────────────────────────────────────────────────────
+.vscode/
+*.code-workspace
+
+# ─── Environment & Secrets ────────────────────────────────────────────────────
+.env
+.env.local
+.env.production
+
+# ─── Uploads (keep placeholder) ───────────────────────────────────────────────
+uploads/*
+!uploads/.gitkeep
+
+# ─── OS Files ─────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── Docker ───────────────────────────────────────────────────────────────────
+docker-compose.override.yml
+
+# ─── MySQL Data ───────────────────────────────────────────────────────────────
+mysql-data/

@@ -1,0 +1,30 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Smart Service & Support Management System — Development Profile
+# ─────────────────────────────────────────────────────────────────────────────
+spring:
+
+  # ── DataSource ──────────────────────────────────────────────────────────────
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:smart_support}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8
+    username: ${DB_USERNAME:support_user}
+    password: ${DB_PASSWORD:changeme}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      pool-name: SupportHikariPool
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  # ── JPA Override for Dev ─────────────────────────────────────────────────
+  jpa:
+    show-sql: true
+
+# ── Logging Override for Dev ───────────────────────────────────────────────
+logging:
+  level:
+    com.example.support: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql: TRACE
