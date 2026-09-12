@@ -1,15 +1,17 @@
 import { BrowserRouter } from 'react-router-dom'
+import { AuthProvider } from '@/context/AuthContext'
 import AppRoutes from '@/routes/AppRoutes'
 
 /**
  * Root application component.
- * BrowserRouter wraps the entire app for client-side routing.
- * AuthContext and other global providers will be added in Phase 2.
+ * BrowserRouter and AuthProvider wrap the entire application.
  */
 function App() {
   return (
     <BrowserRouter>
-      <AppRoutes />
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
     </BrowserRouter>
   )
 }

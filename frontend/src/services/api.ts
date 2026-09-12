@@ -1,10 +1,9 @@
-import axios from 'axios'
+import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
 
 /**
- * Configured Axios instance for all API requests.
+ * Configured Axios instance with JWT interceptors.
  *
- * Phase 0: Basic instance with baseURL only.
- * Phase 2: JWT interceptors (request + response) will be added here.
+ * Security Note: Tokens are retrieved from localStorage for MVP browser session persistence.
  */
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080/api',
@@ -14,23 +13,33 @@ const api = axios.create({
   },
 })
 
-// ── Request interceptor — Phase 2 will attach JWT here ─────────────────────
+// ── Request interceptor: Attach JWT Bearer token ───────────────────────────────
 api.interceptors.request.use(
-  (config) => {
-    // TODO Phase 2: Read token from AuthContext / localStorage and attach
-    // const token = localStorage.getItem('access_token')
-    // if (token) config.headers.Authorization = `Bearer ${token}`
+  (config: InternalAxiosRequestConfig) => {
+    const token = localStorage.getItem('access_token')
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
     return config
   },
   (error) => Promise.reject(error)
 )
 
-// ── Response interceptor — Phase 2 will handle 401 / token refresh here ────
+// ── Response interceptor: Handle 401 & 403 ─────────────────────────────────────
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    // TODO Phase 2: Handle 401 → redirect to /login
-    // TODO Phase 2: Handle 403 → show forbidden message
+  (error: AxiosError) => {
+    if (error.response?.status === 401) {
+      // Clear expired or invalid credentials
+      const currentPath = window.location.pathname
+      const isAuthRoute = currentPath === '/login' || currentPath === '/register' || currentPath === '/'
+
+      if (!isAuthRoute) {
+        localStorage.removeItem('access_token')
+        localStorage.removeItem('auth_user')
+        window.location.href = '/login'
+      }
+    }
     return Promise.reject(error)
   }
 )

@@ -2,29 +2,29 @@
 
 ## 1. Overview
 
-The system follows a multi-tier, clean enterprise architecture:
+The system follows a multi-tier, clean enterprise architecture with Spring Security 6 stateless JWT authentication and role-based access control (RBAC):
 
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                    Presentation Tier                    │
-│          React 18 + TypeScript + Vite + Tailwind        │
+│     React 18 + TypeScript + Vite + Tailwind + AuthCtx   │
 └────────────────────────────┬────────────────────────────┘
-                             │ HTTPS REST / JSON
+                             │ HTTPS REST / JSON (Bearer JWT)
 ┌────────────────────────────▼────────────────────────────┐
-│                        API Tier                         │
-│           Spring Boot 3 REST Controllers & DTOs         │
+│                   Security & API Tier                   │
+│    Spring Security 6 + JwtAuthFilter + REST Endpoints   │
 └────────────────────────────┬────────────────────────────┘
                              │
 ┌────────────────────────────▼────────────────────────────┐
 │                      Service Tier                       │
-│    Spring Service Classes (Business Logic & Validation) │
+│  AuthService (BCrypt) + Business Logic & MapStruct DTOs │
 └────────────────────────────┬────────────────────────────┘
                              │
 ┌────────────────────────────▼────────────────────────────┐
 │                    Persistence Tier                     │
-│      Spring Data JPA + Hibernate 6 ORM + MapStruct      │
+│      Spring Data JPA + Hibernate 6 ORM + HikariCP       │
 └────────────────────────────┬────────────────────────────┘
-                             │ JDBC (HikariCP)
+                             │ JDBC
 ┌────────────────────────────▼────────────────────────────┐
 │                      Database Tier                      │
 │                    MySQL 8+ Database                    │
@@ -37,10 +37,11 @@ The system follows a multi-tier, clean enterprise architecture:
 
 | Layer | Technologies | Responsibilities |
 |---|---|---|
-| **Presentation** | React 18, TypeScript, Vite, Tailwind CSS, React Router, React Hook Form, Yup, Recharts, Lucide Icons | Responsive UI, client-side routing, form validation, state management, dashboard analytics charts. |
-| **API Layer** | Spring Web (Spring Boot 3.3), OpenAPI / Swagger, GlobalExceptionHandler | RESTful endpoint routing, DTO request mapping, Bean Validation, standardized HTTP response envelopes. |
-| **Service Layer** | Spring Service components, MapStruct mappers | Core business logic, ticket assignment and state transition rules, entity-to-DTO transformations. |
-| **Persistence Layer** | Spring Data JPA, Hibernate ORM, HikariCP | Repository abstractions, derived query methods, lazy loading, relational entity modeling. |
+| **Presentation** | React 18, TypeScript, Vite, Tailwind CSS, React Router, AuthContext, Axios Interceptor | Responsive UI, client-side routing, protected route guards, JWT session restore, login/register forms, role-tailored navigation. |
+| **Security Layer** | Spring Security 6, JJWT (HMAC-SHA256), BCrypt | Stateless session management, token validation, user active-status verification, role-based endpoint authorization. |
+| **API Layer** | Spring Web (Spring Boot 3.3), OpenAPI / Swagger, GlobalExceptionHandler | RESTful endpoint routing, DTO request mapping, Bean Validation, standardized HTTP response envelopes (400, 401, 403, 404, 409). |
+| **Service Layer** | Spring Service components, MapStruct mappers | Core authentication and business logic, transactional customer registration with unique code generation (`CUST-xxxxx`), entity-to-DTO transformations. |
+| **Persistence Layer** | Spring Data JPA, Hibernate ORM, HikariCP | Repository abstractions, derived query methods, relational entity modeling. |
 | **Database** | MySQL 8.0+ (InnoDB, UTF-8 utf8mb4) | ACID relational data storage, constraints, foreign keys, query indexes. |
 
 ---
@@ -48,19 +49,25 @@ The system follows a multi-tier, clean enterprise architecture:
 ## 3. Communication & Data Flow
 
 ```
-Client Request (JSON)
+Client Request (Bearer JWT)
        │
        ▼
-[Controller] ───────────▶ [Bean Validation (@Valid)]
+[JwtAuthenticationFilter] ──▶ [Validate Signature & Expiration & Active Status]
        │
        ▼
-   [Service] ───────────▶ [MapStruct (RequestDTO ➔ Entity)]
+[SecurityContextHolder] ────▶ [Authorize Role (ROLE_ADMIN, ROLE_AGENT, ROLE_CUSTOMER)]
        │
        ▼
-  [Repository] ─────────▶ [MySQL 8 Database via JPA]
+[Controller] ───────────────▶ [Bean Validation (@Valid)]
        │
        ▼
-  [MapStruct] ──────────▶ (Entity ➔ ResponseDTO)
+    [Service] ──────────────▶ [Transactional Business Logic & BCrypt]
+       │
+       ▼
+   [Repository] ────────────▶ [MySQL 8 Database via JPA]
+       │
+       ▼
+   [MapStruct] ─────────────▶ (Entity ➔ ResponseDTO [Excludes passwordHash])
        │
        ▼
 Client Response (JSON)
@@ -68,13 +75,14 @@ Client Response (JSON)
 
 ---
 
-## 4. Current Status: Phase 1 Complete
+## 4. Current Status: Phase 2 Complete
 
-- ✅ Normalized 12-table relational database schema (`db/schema.sql`).
-- ✅ Seed dataset with BCrypt password hashes (`db/seed.sql`).
-- ✅ 12 Spring Data JPA entities with lifecycle enums (`TicketPriority`, `TicketStatus`).
-- ✅ 12 Spring Data JPA repositories with verified derived-query property paths.
-- ✅ Request & Response DTOs with Jakarta Bean Validation.
-- ✅ MapStruct 1.5 mappers for entity-DTO transformations.
-- ✅ Java 17 compatibility verified across Maven compilation and test suite.
-- ⏳ Authentication, JWT filter, and Controller endpoints will be implemented in Phase 2.
+- ✅ Strict Java 17 compliance across Maven, compiler, and build configuration.
+- ✅ Normalized 12-table relational database schema with verified BCrypt demo password hashes (`Admin@123`).
+- ✅ Spring Security 6 stateless filter chain with `JwtAuthenticationFilter` verifying signature, expiration (15m), and account active status.
+- ✅ Customer public registration strictly assigning `ROLE_CUSTOMER` and generating unique customer code (`CUST-xxxxx`) in a single database transaction.
+- ✅ User login with BCrypt password verification and safe `UserResponse` (strictly excluding `passwordHash`).
+- ✅ Role-Based Access Control (RBAC) enforced on backend URL matchers (`/api/admin/**`, `/api/agent/**`, `/api/customer/**`).
+- ✅ Frontend `AuthContext`, Axios request/response interceptors, `ProtectedRoute` with 403 access denial handling, and dynamic role navigation.
+- ✅ 33 backend tests passing with H2 test profile.
+- ✅ Frontend TypeScript compilation and production build passing with 0 errors.

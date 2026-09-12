@@ -1,18 +1,48 @@
-import { Menu, Bell, ChevronDown, User } from 'lucide-react'
+import { Menu, Bell, User, LogOut } from 'lucide-react'
+import { useAuth } from '@/context/AuthContext'
+import { useNavigate } from 'react-router-dom'
 
 interface TopBarProps {
   onMenuClick: () => void
 }
 
-/**
- * Top navigation bar.
- * Shows hamburger (mobile), page context, notifications, and user avatar.
- * Phase 2: Will display logged-in user name/role and notification count.
- */
 export default function TopBar({ onMenuClick }: TopBarProps) {
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login')
+  }
+
+  const formatRoleName = (role?: string) => {
+    switch (role) {
+      case 'ROLE_ADMIN':
+        return 'Administrator'
+      case 'ROLE_AGENT':
+        return 'Support Agent'
+      case 'ROLE_CUSTOMER':
+        return 'Customer'
+      default:
+        return 'User'
+    }
+  }
+
+  const roleBadgeColor = (role?: string) => {
+    switch (role) {
+      case 'ROLE_ADMIN':
+        return 'bg-purple-100 text-purple-700 border-purple-200'
+      case 'ROLE_AGENT':
+        return 'bg-blue-100 text-blue-700 border-blue-200'
+      case 'ROLE_CUSTOMER':
+        return 'bg-emerald-100 text-emerald-700 border-emerald-200'
+      default:
+        return 'bg-slate-100 text-slate-700 border-slate-200'
+    }
+  }
+
   return (
     <header className="h-16 bg-white border-b border-surface-border flex items-center px-4 gap-4 flex-shrink-0 z-10">
-
       {/* ── Hamburger (mobile) ─────────────────────────────────────────────── */}
       <button
         onClick={onMenuClick}
@@ -34,26 +64,46 @@ export default function TopBar({ onMenuClick }: TopBarProps) {
 
       {/* ── Notification bell ──────────────────────────────────────────────── */}
       <button
+        onClick={() => navigate('/notifications')}
         className="relative p-2 rounded-lg hover:bg-slate-100 text-slate-600 transition-colors"
         aria-label="Notifications"
       >
         <Bell size={20} />
-        {/* Unread count badge — will be driven by real data in Phase 8 */}
         <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500" />
       </button>
 
-      {/* ── User menu ──────────────────────────────────────────────────────── */}
-      <div className="flex items-center gap-2 pl-2 border-l border-surface-border cursor-pointer
-                      hover:bg-slate-50 rounded-lg px-2 py-1.5 transition-colors">
-        <div className="w-8 h-8 rounded-full bg-brand flex items-center justify-center">
+      {/* ── User info & Role Badge ──────────────────────────────────────────── */}
+      <div
+        onClick={() => navigate('/profile')}
+        className="flex items-center gap-2.5 pl-2 border-l border-surface-border cursor-pointer hover:bg-slate-50 rounded-lg px-2 py-1.5 transition-colors"
+        title="View profile"
+      >
+        <div className="w-8 h-8 rounded-full bg-brand flex items-center justify-center flex-shrink-0">
           <User size={16} className="text-white" />
         </div>
         <div className="hidden sm:block text-left">
-          <p className="text-sm font-medium text-slate-800 leading-tight">Demo User</p>
-          <p className="text-[11px] text-slate-400 leading-tight">Phase 0 Scaffold</p>
+          <p className="text-sm font-semibold text-slate-800 leading-tight">
+            {user ? `${user.firstName} ${user.lastName}` : 'Guest User'}
+          </p>
+          <span
+            className={`inline-block mt-0.5 text-[10px] font-medium px-1.5 py-0.2 rounded border ${roleBadgeColor(
+              user?.role
+            )}`}
+          >
+            {formatRoleName(user?.role)}
+          </span>
         </div>
-        <ChevronDown size={16} className="text-slate-400 hidden sm:block" />
       </div>
+
+      {/* ── Logout Button ──────────────────────────────────────────────────── */}
+      <button
+        onClick={handleLogout}
+        className="p-2 rounded-lg hover:bg-rose-50 text-slate-500 hover:text-rose-600 transition-colors"
+        title="Sign out"
+        aria-label="Sign out"
+      >
+        <LogOut size={18} />
+      </button>
     </header>
   )
 }

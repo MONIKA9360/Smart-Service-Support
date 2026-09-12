@@ -1,9 +1,18 @@
 import { NavLink } from 'react-router-dom'
 import {
-  LayoutDashboard, Ticket, Settings, Users, UserCircle,
-  Bell, BarChart2, Briefcase, X, ShieldCheck, type LucideIcon,
+  LayoutDashboard,
+  Ticket,
+  Settings,
+  Users,
+  UserCircle,
+  Bell,
+  BarChart2,
+  Briefcase,
+  X,
+  type LucideIcon,
 } from 'lucide-react'
 import clsx from 'clsx'
+import { useAuth } from '@/context/AuthContext'
 
 interface SidebarProps {
   isOpen: boolean
@@ -16,27 +25,42 @@ interface NavItem {
   icon: LucideIcon
 }
 
-// Navigation items — will be filtered by role in Phase 2
-const navItems: NavItem[] = [
-  { label: 'Admin Dashboard',    to: '/admin',         icon: ShieldCheck },
-  { label: 'Agent Dashboard',    to: '/agent',         icon: Briefcase   },
-  { label: 'Customer Dashboard', to: '/customer',      icon: UserCircle  },
-  { label: 'Tickets',            to: '/tickets',       icon: Ticket      },
-  { label: 'Services',           to: '/services',      icon: Settings    },
-  { label: 'Users',              to: '/profile',       icon: Users       },
-  { label: 'Notifications',      to: '/notifications', icon: Bell        },
-  { label: 'Reports',            to: '/reports',       icon: BarChart2   },
-]
-
-/**
- * Collapsible sidebar component.
- * Phase 2: Will filter nav items based on authenticated user role.
- */
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
+  const { user } = useAuth()
+  const role = user?.role
+
+  let navItems: NavItem[] = []
+
+  if (role === 'ROLE_ADMIN') {
+    navItems = [
+      { label: 'Admin Dashboard', to: '/admin', icon: LayoutDashboard },
+      { label: 'Tickets', to: '/tickets', icon: Ticket },
+      { label: 'Services', to: '/services', icon: Settings },
+      { label: 'Users & Profile', to: '/profile', icon: Users },
+      { label: 'Reports', to: '/reports', icon: BarChart2 },
+      { label: 'Notifications', to: '/notifications', icon: Bell },
+    ]
+  } else if (role === 'ROLE_AGENT') {
+    navItems = [
+      { label: 'Agent Dashboard', to: '/agent', icon: Briefcase },
+      { label: 'Assigned Tickets', to: '/tickets', icon: Ticket },
+      { label: 'Notifications', to: '/notifications', icon: Bell },
+      { label: 'Profile', to: '/profile', icon: UserCircle },
+    ]
+  } else {
+    // Customer default
+    navItems = [
+      { label: 'Customer Dashboard', to: '/customer', icon: UserCircle },
+      { label: 'My Tickets', to: '/tickets', icon: Ticket },
+      { label: 'Services', to: '/services', icon: Settings },
+      { label: 'Notifications', to: '/notifications', icon: Bell },
+      { label: 'Profile', to: '/profile', icon: UserCircle },
+    ]
+  }
+
   return (
     <aside
       className={clsx(
-        // Base: hidden on mobile, slide in when isOpen
         'fixed inset-y-0 left-0 z-30 w-64 flex flex-col bg-white border-r border-surface-border shadow-sm',
         'transition-transform duration-300 ease-in-out',
         'lg:relative lg:translate-x-0 lg:flex',
@@ -44,7 +68,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       )}
       aria-label="Main navigation"
     >
-      {/* ── Logo / Brand ──────────────────────────────────────────────────── */}
+      {/* ── Logo / Brand ─────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between h-16 px-4 border-b border-surface-border flex-shrink-0">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-brand flex items-center justify-center flex-shrink-0">
@@ -52,7 +76,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           </div>
           <div className="min-w-0">
             <p className="text-sm font-bold text-slate-900 truncate leading-tight">SmartSupport</p>
-            <p className="text-[10px] text-slate-400 leading-tight">Management System</p>
+            <p className="text-[10px] text-slate-400 leading-tight">
+              {role === 'ROLE_ADMIN' ? 'Admin Portal' : role === 'ROLE_AGENT' ? 'Agent Workspace' : 'Customer Portal'}
+            </p>
           </div>
         </div>
         {/* Close button on mobile */}
@@ -65,7 +91,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         </button>
       </div>
 
-      {/* ── Navigation ────────────────────────────────────────────────────── */}
+      {/* ── Navigation ───────────────────────────────────────────────────── */}
       <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-0.5">
         <p className="px-3 mb-2 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
           Navigation
@@ -85,7 +111,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         ))}
       </nav>
 
-      {/* ── Footer ────────────────────────────────────────────────────────── */}
+      {/* ── Footer ───────────────────────────────────────────────────────── */}
       <div className="px-4 py-3 border-t border-surface-border flex-shrink-0">
         <p className="text-[11px] text-slate-400 text-center">
           Smart Service & Support v1.0

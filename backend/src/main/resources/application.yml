@@ -67,8 +67,8 @@ logging:
 # ── Application Custom Properties ─────────────────────────────────────────────
 app:
   jwt:
-    secret: ${JWT_SECRET:changeme-this-is-a-very-long-secret-key-for-development-only}
-    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+    secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+    expiration-ms: ${JWT_EXPIRATION_MS:900000}
   file:
     upload-dir: ${FILE_UPLOAD_DIR:./uploads}
     max-size-mb: ${FILE_MAX_SIZE_MB:10}

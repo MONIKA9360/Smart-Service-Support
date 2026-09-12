@@ -1,61 +1,100 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import MainLayout from '@/layouts/MainLayout'
+import ProtectedRoute from '@/components/auth/ProtectedRoute'
+import { useAuth } from '@/context/AuthContext'
 
 // Public pages
-import LandingPage    from '@/pages/public/LandingPage'
-import LoginPage      from '@/pages/public/LoginPage'
-import RegisterPage   from '@/pages/public/RegisterPage'
+import LandingPage from '@/pages/public/LandingPage'
+import LoginPage from '@/pages/public/LoginPage'
+import RegisterPage from '@/pages/public/RegisterPage'
 
-// Placeholder dashboard pages
-import AdminDashboard    from '@/pages/admin/AdminDashboard'
-import AgentDashboard    from '@/pages/agent/AgentDashboard'
+// Dashboard pages
+import AdminDashboard from '@/pages/admin/AdminDashboard'
+import AgentDashboard from '@/pages/agent/AgentDashboard'
 import CustomerDashboard from '@/pages/customer/CustomerDashboard'
 
-// Shared placeholder pages
-import ProfilePage        from '@/pages/shared/ProfilePage'
-import TicketListPage     from '@/pages/shared/TicketListPage'
-import ServiceListPage    from '@/pages/shared/ServiceListPage'
-import NotificationsPage  from '@/pages/shared/NotificationsPage'
-import ReportsPage        from '@/pages/shared/ReportsPage'
-import NotFoundPage       from '@/pages/public/NotFoundPage'
+// Shared pages
+import ProfilePage from '@/pages/shared/ProfilePage'
+import TicketListPage from '@/pages/shared/TicketListPage'
+import ServiceListPage from '@/pages/shared/ServiceListPage'
+import NotificationsPage from '@/pages/shared/NotificationsPage'
+import ReportsPage from '@/pages/shared/ReportsPage'
+import NotFoundPage from '@/pages/public/NotFoundPage'
 
 /**
- * Application route definitions.
- *
- * Phase 0: All routes are accessible (no auth guards yet).
- * Phase 2: ProtectedRoute HOC will enforce role-based access control.
+ * Helper to dynamically redirect /dashboard to the role's appropriate home.
+ */
+function DashboardRedirect() {
+  const { user, isAuthenticated } = useAuth()
+  if (!isAuthenticated || !user) {
+    return <Navigate to="/login" replace />
+  }
+  if (user.role === 'ROLE_ADMIN') return <Navigate to="/admin" replace />
+  if (user.role === 'ROLE_AGENT') return <Navigate to="/agent" replace />
+  return <Navigate to="/customer" replace />
+}
+
+/**
+ * Application route definitions with RBAC guards.
  */
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* ── Public routes (no layout wrapper) ─────────────────────────────── */}
-      <Route path="/"         element={<LandingPage />} />
-      <Route path="/login"    element={<LoginPage />} />
+      {/* ── Public routes ──────────────────────────────────────────────── */}
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
 
-      {/* ── Authenticated routes (inside MainLayout) ───────────────────────── */}
-      <Route element={<MainLayout />}>
-        {/* Dashboard redirects */}
-        <Route path="/dashboard"          element={<Navigate to="/admin" replace />} />
+      {/* ── Authenticated routes (MainLayout) ──────────────────────────── */}
+      <Route
+        element={
+          <ProtectedRoute>
+            <MainLayout />
+          </ProtectedRoute>
+        }
+      >
+        {/* Dynamic dashboard routing */}
+        <Route path="/dashboard" element={<DashboardRedirect />} />
 
-        {/* Admin */}
-        <Route path="/admin"              element={<AdminDashboard />} />
+        {/* Admin only */}
+        <Route
+          path="/admin/*"
+          element={
+            <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
 
-        {/* Agent */}
-        <Route path="/agent"              element={<AgentDashboard />} />
+        {/* Agent only */}
+        <Route
+          path="/agent/*"
+          element={
+            <ProtectedRoute allowedRoles={['ROLE_AGENT']}>
+              <AgentDashboard />
+            </ProtectedRoute>
+          }
+        />
 
-        {/* Customer */}
-        <Route path="/customer"           element={<CustomerDashboard />} />
+        {/* Customer only */}
+        <Route
+          path="/customer/*"
+          element={
+            <ProtectedRoute allowedRoles={['ROLE_CUSTOMER']}>
+              <CustomerDashboard />
+            </ProtectedRoute>
+          }
+        />
 
-        {/* Shared */}
-        <Route path="/profile"            element={<ProfilePage />} />
-        <Route path="/tickets"            element={<TicketListPage />} />
-        <Route path="/services"           element={<ServiceListPage />} />
-        <Route path="/notifications"      element={<NotificationsPage />} />
-        <Route path="/reports"            element={<ReportsPage />} />
+        {/* Shared Authenticated Pages */}
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/tickets" element={<TicketListPage />} />
+        <Route path="/services" element={<ServiceListPage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/reports" element={<ReportsPage />} />
       </Route>
 
-      {/* ── 404 ────────────────────────────────────────────────────────────── */}
+      {/* ── 404 ───────────────────────────────────────────────────────── */}
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )

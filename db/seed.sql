@@ -18,20 +18,20 @@ INSERT IGNORE INTO `roles` (`id`, `name`, `description`) VALUES
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 2. USERS
--- BCrypt hash for "Admin@123" is: $2a$10$7EqJtq98hPqEX7fNZaFWoO7pjFbRk8vVGZ6kJf4lHmMH1TZjS8JHi
+-- Verified BCrypt hash for "Admin@123" is: $2a$10$YukCzCnR/elzZB0SyLd4ZulPOwxVdV0u/drrVhs.H4uhWIq/I/F9O
 -- ─────────────────────────────────────────────────────────────────────────────
 INSERT IGNORE INTO `users`
   (`id`, `first_name`, `last_name`, `email`, `password_hash`, `phone`, `role_id`, `is_active`)
 VALUES
   -- 1 Admin
-  (1, 'System', 'Admin',    'admin@smartsupport.com',      '$2a$10$7EqJtq98hPqEX7fNZaFWoO7pjFbRk8vVGZ6kJf4lHmMH1TZjS8JHi', '+1-555-0001', 1, 1),
+  (1, 'System', 'Admin',    'admin@smartsupport.com',      '$2a$10$YukCzCnR/elzZB0SyLd4ZulPOwxVdV0u/drrVhs.H4uhWIq/I/F9O', '+1-555-0001', 1, 1),
   -- 2 Support Agents
-  (2, 'Alice',  'Turner',   'alice@smartsupport.com',      '$2a$10$7EqJtq98hPqEX7fNZaFWoO7pjFbRk8vVGZ6kJf4lHmMH1TZjS8JHi', '+1-555-0101', 2, 1),
-  (3, 'Bob',    'Harris',   'bob@smartsupport.com',        '$2a$10$7EqJtq98hPqEX7fNZaFWoO7pjFbRk8vVGZ6kJf4lHmMH1TZjS8JHi', '+1-555-0102', 2, 1),
+  (2, 'Alice',  'Turner',   'alice@smartsupport.com',      '$2a$10$YukCzCnR/elzZB0SyLd4ZulPOwxVdV0u/drrVhs.H4uhWIq/I/F9O', '+1-555-0101', 2, 1),
+  (3, 'Bob',    'Harris',   'bob@smartsupport.com',        '$2a$10$YukCzCnR/elzZB0SyLd4ZulPOwxVdV0u/drrVhs.H4uhWIq/I/F9O', '+1-555-0102', 2, 1),
   -- 3 Customers
-  (4, 'John',   'Doe',      'john.doe@example.com',        '$2a$10$7EqJtq98hPqEX7fNZaFWoO7pjFbRk8vVGZ6kJf4lHmMH1TZjS8JHi', '+1-555-1001', 3, 1),
-  (5, 'Jane',   'Smith',    'jane.smith@example.com',      '$2a$10$7EqJtq98hPqEX7fNZaFWoO7pjFbRk8vVGZ6kJf4lHmMH1TZjS8JHi', '+1-555-1002', 3, 1),
-  (6, 'Mike',   'Johnson',  'mike.johnson@example.com',    '$2a$10$7EqJtq98hPqEX7fNZaFWoO7pjFbRk8vVGZ6kJf4lHmMH1TZjS8JHi', '+1-555-1003', 3, 1);
+  (4, 'John',   'Doe',      'john.doe@example.com',        '$2a$10$YukCzCnR/elzZB0SyLd4ZulPOwxVdV0u/drrVhs.H4uhWIq/I/F9O', '+1-555-1001', 3, 1),
+  (5, 'Jane',   'Smith',    'jane.smith@example.com',      '$2a$10$YukCzCnR/elzZB0SyLd4ZulPOwxVdV0u/drrVhs.H4uhWIq/I/F9O', '+1-555-1002', 3, 1),
+  (6, 'Mike',   'Johnson',  'mike.johnson@example.com',    '$2a$10$YukCzCnR/elzZB0SyLd4ZulPOwxVdV0u/drrVhs.H4uhWIq/I/F9O', '+1-555-1003', 3, 1);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3. CUSTOMERS
