@@ -1,27 +1,23 @@
-@REM Licensed to the Apache Software Foundation (ASF) under one
-@REM or more contributor license agreements.
-@REM
-@REM Maven Wrapper batch script for Windows
-@REM https://maven.apache.org/wrapper/
-@REM
+@REM ----------------------------------------------------------------------------
+@REM Maven Wrapper Batch Script for Windows
+@REM ----------------------------------------------------------------------------
+@IF "%DEBUG%" == "true" @ECHO ON
 
-@IF "%__MVNW_ARG0_NAME__%"=="" (SET __MVNW_ARG0_NAME__=%~nx0)
+@SETLOCAL
 
-@SET MAVEN_PROJECTBASEDIR=%~dp0
-@IF NOT "%MAVEN_BASEDIR%"=="" SET MAVEN_PROJECTBASEDIR=%MAVEN_BASEDIR%
+@SET MAVEN_CMD=%USERPROFILE%\.m2\wrapper\dists\apache-maven-3.9.6-bin\apache-maven-3.9.6\bin\mvn.cmd
 
-@SET MVNW_REPODIR=%USERPROFILE%\.m2\wrapper\dists
-
-@powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0.mvn\wrapper\MavenWrapperDownloader.ps1" %*
-@IF ERRORLEVEL 1 GOTO END
-
-@FOR /F "tokens=*" %%G IN ('powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0.mvn\wrapper\MavenWrapperDownloader.ps1" --get-mvn-path') DO SET MAVEN_CMD=%%G
-
-@IF NOT EXIST "%MAVEN_CMD%" (
-  @echo Could not download Maven. Please install Maven manually.
-  @GOTO END
+@IF EXIST "%MAVEN_CMD%" (
+  @"%MAVEN_CMD%" %*
+  @EXIT /B %ERRORLEVEL%
 )
 
-@"%MAVEN_CMD%" %*
+@REM Fallback to standard mvn in PATH if available
+@WHERE mvn >nul 2>nul
+@IF %ERRORLEVEL% EQU 0 (
+  @mvn %*
+  @EXIT /B %ERRORLEVEL%
+)
 
-:END
+@ECHO Apache Maven not found at %MAVEN_CMD% and 'mvn' is not in PATH.
+@EXIT /B 1

@@ -1,117 +1,66 @@
 # API Documentation — Smart Service & Support Management System
 
-> **Status:** Phase 0 — API plan documented below. Full Swagger UI will be available at
-> `http://localhost:8080/swagger-ui/index.html` once Phase 2 (Authentication) is implemented.
+> **Phase 1 Status:** Data model, JPA entities, DTOs with Bean Validation, MapStruct mappers, and repositories are established. REST endpoints and controllers will be connected in subsequent phases (Phase 2: Authentication; Phase 3: Ticket Operations).
 
-## Base URL
+---
 
-```
-http://localhost:8080/api
-```
+## 1. Base Configuration
 
-## Authentication
+- **Base URL:** `http://localhost:8080/api`
+- **Swagger / OpenAPI UI:** `http://localhost:8080/api/swagger-ui.html`
+- **OpenAPI JSON Spec:** `http://localhost:8080/api/api-docs`
 
-All protected endpoints require:
-```
-Authorization: Bearer <JWT_TOKEN>
-```
+---
 
-Obtain token via `POST /api/auth/login`.
+## 2. Standard Response Format
 
-## Response Format
-
-**Success:**
+### Success Response Envelope
 ```json
 {
   "success": true,
   "message": "Operation successful",
-  "data": { }
+  "data": { ... }
 }
 ```
 
-**Error:**
+### Error Response Envelope
 ```json
 {
   "success": false,
-  "message": "Human-readable error",
-  "errorCode": "ERROR_CODE_CONSTANT",
-  "details": { }
+  "message": "Detailed error message",
+  "errorCode": "VALIDATION_FAILED",
+  "details": {
+    "email": "Email must be valid",
+    "password": "Password is required"
+  }
 }
 ```
 
-## Planned Endpoints
+---
 
-### Authentication
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| POST | `/auth/register` | Customer registration | Public |
-| POST | `/auth/login` | Login, returns JWT | Public |
-| GET | `/auth/me` | Get current user profile | Any |
+## 3. Data Transfer Objects (Phase 1 Implemented)
 
-### Customers
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/customers` | List all customers (paginated) | ADMIN |
-| GET | `/customers/{id}` | Get customer by ID | ADMIN |
-| PUT | `/customers/{id}` | Update customer | ADMIN |
-| DELETE | `/customers/{id}` | Deactivate customer | ADMIN |
+### Request DTOs
+- `UserCreateRequest` (`firstName`, `lastName`, `email`, `password`, `phone`, `roleId`)
+- `UserUpdateRequest` (`firstName`, `lastName`, `email`, `phone`, `isActive`, `roleId`)
+- `CustomerRequest` (`userId`, `customerCode`, `address`, `city`, `state`, `postalCode`)
+- `EmployeeRequest` (`userId`, `employeeCode`, `department`, `designation`)
+- `ServiceRequest` (`serviceName`, `description`, `category`, `isActive`)
+- `TicketCreateRequest` (`customerId`, `serviceId`, `title`, `description`, `priority`)
+- `TicketUpdateRequest` (`assignedEmployeeId`, `serviceId`, `title`, `description`, `priority`, `status`, `resolution`)
+- `TicketCommentRequest` (`ticketId`, `userId`, `commentText`)
+- `FeedbackRequest` (`ticketId`, `customerId`, `rating`, `comment`)
 
-### Employees
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/employees` | List all agents | ADMIN |
-| POST | `/employees` | Create employee account | ADMIN |
-| PUT | `/employees/{id}` | Update employee | ADMIN |
-
-### Services
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/services` | List active services | Any |
-| POST | `/services` | Create service | ADMIN |
-| PUT | `/services/{id}` | Update service | ADMIN |
-| DELETE | `/services/{id}` | Deactivate service | ADMIN |
-
-### Tickets
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/tickets` | List tickets (filtered, paginated) | Any (role-scoped) |
-| POST | `/tickets` | Create new ticket | CUSTOMER |
-| GET | `/tickets/{id}` | Get ticket detail | Any (row-level) |
-| PUT | `/tickets/{id}` | Update ticket | ADMIN / AGENT |
-| PATCH | `/tickets/{id}/status` | Change ticket status | ADMIN / AGENT |
-| PATCH | `/tickets/{id}/assign` | Assign ticket to agent | ADMIN |
-
-### Comments
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/tickets/{id}/comments` | Get all comments | Any (row-level) |
-| POST | `/tickets/{id}/comments` | Add comment | Any (row-level) |
-
-### Attachments
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| POST | `/tickets/{id}/attachments` | Upload file | Any (row-level) |
-
-### Feedback
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| POST | `/tickets/{id}/feedback` | Submit rating | CUSTOMER |
-| GET | `/feedback` | List all feedback | ADMIN |
-
-### Notifications
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/notifications` | Get user notifications | Any |
-| PATCH | `/notifications/{id}/read` | Mark as read | Any |
-
-### Reports
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/reports/dashboard` | Dashboard metrics | ADMIN |
-| GET | `/reports/tickets` | Ticket report | ADMIN |
-| GET | `/reports/employees` | Employee performance | ADMIN |
-
-### Activity Logs
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/logs` | Activity log (paginated) | ADMIN |
+### Response DTOs
+- `UserResponse` (`id`, `firstName`, `lastName`, `email`, `phone`, `roleId`, `roleName`, `isActive`, `createdAt`, `updatedAt` — **strictly excludes `passwordHash`**)
+- `RoleResponse` (`id`, `name`, `description`, `createdAt`, `updatedAt`)
+- `CustomerResponse` (`id`, `userId`, `firstName`, `lastName`, `email`, `customerCode`, `address`, `city`, `state`, `postalCode`, `createdAt`, `updatedAt`)
+- `EmployeeResponse` (`id`, `userId`, `firstName`, `lastName`, `email`, `employeeCode`, `department`, `designation`, `createdAt`, `updatedAt`)
+- `ServiceResponse` (`id`, `serviceName`, `description`, `category`, `isActive`, `createdAt`, `updatedAt`)
+- `TicketResponse` (`id`, `ticketNumber`, `customerId`, `customerName`, `customerCode`, `assignedEmployeeId`, `assignedEmployeeName`, `serviceId`, `serviceName`, `title`, `description`, `priority`, `status`, `resolution`, `createdAt`, `updatedAt`, `assignedAt`, `resolvedAt`, `closedAt`)
+- `TicketCommentResponse` (`id`, `ticketId`, `userId`, `userName`, `userRole`, `commentText`, `createdAt`, `updatedAt`)
+- `TicketAttachmentResponse` (`id`, `ticketId`, `uploadedById`, `uploadedByName`, `originalFileName`, `storedFileName`, `filePath`, `fileType`, `fileSize`, `createdAt`)
+- `TicketStatusHistoryResponse` (`id`, `ticketId`, `oldStatus`, `newStatus`, `changedById`, `changedByName`, `comment`, `createdAt`)
+- `FeedbackResponse` (`id`, `ticketId`, `ticketNumber`, `customerId`, `customerName`, `rating`, `comment`, `createdAt`, `updatedAt`)
+- `NotificationResponse` (`id`, `userId`, `title`, `message`, `type`, `isRead`, `createdAt`)
+- `ActivityLogResponse` (`id`, `userId`, `userName`, `action`, `entityType`, `entityId`, `description`, `createdAt`)
